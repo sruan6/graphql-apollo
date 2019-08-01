@@ -106,13 +106,17 @@ const Mutation = new GraphQLObjectType({
         genre: { type: new GraphQLNonNull(GraphQLString) },
         creatorid: { type: new GraphQLNonNull(GraphQLID) },
       },
-      resolve(parent, args) {
-        const game = new Game({
-          name: args.name,
-          genre: args.genre,
-          creatorid: args.creatorid,
-        });
-        return game.save();
+      async resolve(parent, args) {
+        const existGame = await Game.findOne({ name: args.name })
+        if(!existGame) {
+          // If game doesn't insist in the database then add to the database//
+          const game = await new Game({
+            name: args.name,
+            genre: args.genre,
+            creatorid: args.creatorid,
+          });
+          return game.save();
+        }
       },
     },
   }),
